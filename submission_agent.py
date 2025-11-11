@@ -22,7 +22,6 @@ from livekit.plugins.turn_detector.multilingual import MultilingualModel
 
 # --- Configuration ---
 # Set up logging to see our custom logs
-# This will make our "GATEKEEPER" logs visible in the terminal
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("robust-agent")
 load_dotenv()
@@ -30,7 +29,6 @@ load_dotenv()
 # --- V13 DYNAMIC CONFIGURATION (Bonus Challenge 2: Multi-language) ---
 # Load default filler words from an environment variable.
 # This list can contain multi-language fillers (e.g., English + Hindi).
-# This is your preferred list:
 DEFAULT_FILLERS_CSV = "um,umm,uh,hmm,hmmm,haan,han,achha,acha,ok,okay,like,yeah,right,a,i"
 
 # Read from .env file (or system environment)
@@ -55,17 +53,14 @@ class RobustAgent(Agent):
     at runtime (Bonus Challenge 1).
     """
     def __init__(self):
-        # --- V14 BONUS CHALLENGE 1: DYNAMIC RUNTIME UPDATE ---
         # Store fillers on the instance, loading from our initial list
         self.ignored_fillers = INITIAL_FILLERS.copy()
 
-        # Define the dynamic update tools
-        tools = [
-            self.add_ignored_filler,
-            self.remove_ignored_filler,
-        ]
-        # --- END V14 ---
-
+        # --- THE FIX IS HERE ---
+        # We NO LONGER manually define a 'tools' list.
+        # The base 'Agent' class will automatically find our
+        # @function_tool decorated methods.
+        
         super().__init__(
             instructions=(
                 "You are a helpful and concise assistant. Keep answers short. "
@@ -73,7 +68,7 @@ class RobustAgent(Agent):
                 "If a user asks you to 'please ignore [word]' or 'stop ignoring [word]', "
                 "you MUST call the appropriate tool."
             ),
-            tools=tools, # Pass tools to the base Agent
+            # By removing 'tools=tools,' we fix the duplicate error.
         )
         
     # --- V14 BONUS CHALLENGE 1: DYNAMIC UPDATE FUNCTIONS ---
